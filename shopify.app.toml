@@ -3,29 +3,31 @@
 client_id = "5917e723896ab37aa5ee93e2045cd6d5"
 name = "revolve-connect"
 handle = "revolve-connect"
-application_url = "https://example.com/"
+application_url = "https://perspective-minus-interior-clothing.trycloudflare.com"
 embedded = true
 
 [build]
 include_config_on_deploy = true
+dev_store_url = "nodnod-theme.myshopify.com"
+automatically_update_urls_on_dev = true
 
 [webhooks]
 api_version = "2025-07"
 
   [[webhooks.subscriptions]]
-  topics = [ "app/uninstalled" ]
-  uri = "/webhooks/app/uninstalled"
-
-  [[webhooks.subscriptions]]
-  topics = [ "app/scopes_update" ]
-  uri = "/webhooks/app/scopes_update"
+  topics = [ "orders/create" ]
+  uri = "/webhooks/app/orders"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products"
+scopes = "read_assigned_fulfillment_orders,read_customers,read_locations,read_merchant_managed_fulfillment_orders,read_third_party_fulfillment_orders,write_inventory,write_metaobject_definitions,write_metaobjects,write_orders,write_products,write_returns,read_inventory"
 
 [auth]
-redirect_urls = [ "https://example.com/api/auth" ]
+redirect_urls = [
+  "https://perspective-minus-interior-clothing.trycloudflare.com/auth/callback",
+  "https://perspective-minus-interior-clothing.trycloudflare.com/auth/shopify/callback",
+  "https://perspective-minus-interior-clothing.trycloudflare.com/api/auth/callback"
+]
 
 [pos]
 embedded = false
