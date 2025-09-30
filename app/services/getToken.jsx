@@ -1,5 +1,6 @@
 import axios from 'axios';
 import redisClient from './redisClient';
+import { log } from "../utils/logger"
 
 const getToken = async () => {
     const serverUrl = process.env.REVOLVE_SERVER_URL;
@@ -18,7 +19,7 @@ const getToken = async () => {
         }
         return { token, userId };
     } catch (error) {
-        console.error('Error fetching token:', error);
+        log('Error fetching token: '+ error, "ERROR");
         throw error;
     }
 };
