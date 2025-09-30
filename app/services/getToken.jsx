@@ -9,11 +9,14 @@ const getToken = async () => {
         const response = await axios.get(serverUrl + '/content/checkout/shopify/access/signin', {
             params: { id, secret }
         });
-        const { token } = response.data;
+        const { token, userId } = response.data;
         if (token) {
             await redisClient.set('revolve_token', token);
         }
-        return token;
+        if (userId) {
+            await redisClient.set('revolve_userId', userId);
+        }
+        return { token, userId };
     } catch (error) {
         console.error('Error fetching token:', error);
         throw error;
