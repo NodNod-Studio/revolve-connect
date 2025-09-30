@@ -1,5 +1,6 @@
+import { submitOrder } from "../services/submitOrder"
 import { authenticate } from "../shopify.server"
-import { log } from '../utils/logger'
+import { log } from "../utils/logger"
 
 export const action = async ({ request }) => {
   const { topic, shop, session, admin, payload } = await authenticate.webhook(request)
@@ -12,16 +13,13 @@ export const action = async ({ request }) => {
 
   switch (topic) {
     case "ORDERS_CREATED":
-      const { tags } = payload
-      const TAGS = tags.toUpperCase()
+      log(`Order created webhook received for order ${payload.id}, payload: ${JSON.stringify(payload)}`)
 
-      // /**
-      //  * Auto return
-      //  */
-      // if (TAGS.includes(returnTag.toUpperCase()) && enableTagBasedOrderReturn) {
-      //   log('[Enabled] Order auto return')
-      //   await createAndCloseReturn(admin, payload)
-      // }
+      submitOrder(payload).then((res) => {
+        log(`Order submission response: ${JSON.stringify(res)}`)
+      }).catch((error) => {
+        log(`Error submitting order: ${error.message}`, "ERROR")
+      })
       break
 
     default:
