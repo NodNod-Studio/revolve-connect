@@ -1,19 +1,16 @@
 import { json } from "@remix-run/node"
 import { log } from "../utils/logger"
 import { createAdminApiClient } from "@shopify/admin-api-client"
-import { sessionStorage } from "../shopify.server"
 import { fulfillOrder } from "../utils/shopifyOrder"
+import { checkToken } from "../utils/auth"
+import { getSession } from "../utils/session"
 
 export async function action({ request, params }) {
   try {
     const orderId = params.id
     const body = await request.json()
 
-    // Check header Authorization Bearer token
-    const authHeader = request.headers.get("Authorization") || ""
-    const token = authHeader.replace("Bearer ", "").trim()
-
-    if (token !== process.env.API_TOKEN) {
+    if (!checkToken(request)) {
       log("Invalid token in fulfill API", "ERROR")
       return json(
         {
@@ -24,38 +21,22 @@ export async function action({ request, params }) {
       )
     }
 
-    // Get store from header
-    const shop = request.headers.get("Store") || ""
-    if (!shop) {
-      log("No store header in fulfill API", "ERROR")
+    const { store, accessToken } = await getSession(request)
+    if (!store || !accessToken) {
       return json(
         {
           success: false,
-          message: "No store header",
+          message: "No store header or session found",
         },
         { status: 400 },
       )
     }
 
-    log(`Fulfilling order ${orderId} for store ${shop}`, "INFO")
-    const session = await sessionStorage.findSessionsByShop(shop + ".myshopify.com")
-
-    if (session.length === 0) {
-      log(`No session found for store ${shop}`, "ERROR")
-      return json(
-        {
-          success: false,
-          message: "No session found for store",
-        },
-        { status: 400 },
-      )
-    }
-    
     // Create Shopify Admin client
     const client = createAdminApiClient({
-      storeDomain: shop + ".myshopify.com",
+      storeDomain: store,
       apiVersion: process.env.SHOPIFY_API_VERSION,
-      accessToken: session[0].accessToken,
+      accessToken: accessToken,
     })
 
     // Fulfill the order
