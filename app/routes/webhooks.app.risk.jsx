@@ -24,7 +24,7 @@ export const action = async ({ request }) => {
   if (risk_level === 'high') {
     log(`High risk handling ${order_id}, and payload: ${JSON.stringify(payload)}`)
     // The order is cancelled
-    await cancelOrder(admin, order_id, 'fraud', true, [], false)
+    await cancelOrder(admin, order_id, 'FRAUD', true, [], false)
   }
 
   throw new Response()
