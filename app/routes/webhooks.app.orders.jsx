@@ -12,7 +12,7 @@ export const action = async ({ request }) => {
 
 
   switch (topic) {
-    case 'ORDERS_CREATED':
+    case 'ORDERS_CREATE':
       log(`Order created webhook received for order ${payload.id}, payload: ${JSON.stringify(payload)}`)
 
       submitOrder(admin, payload).then((res) => {
