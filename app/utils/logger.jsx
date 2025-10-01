@@ -4,7 +4,7 @@
  * @param {string} [level='INFO'] - Log level (e.g., INFO, WARN, ERROR).
  */
 export const log = (message, level = 'INFO') => {
-    // if (process.env.NODE_ENV !== 'production') { // Logs only in non-production environments
-        console.log(`[${level}]`, message)
-    // }
+  // if (process.env.NODE_ENV !== 'production') { // Logs only in non-production environments
+  console.log(`[${level}]`, message)
+  // }
 }
