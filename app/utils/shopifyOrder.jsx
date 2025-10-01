@@ -261,3 +261,67 @@ export async function fulfillOrder(admin, orderId, notifyCustomer = true, tracki
         throw error;
     }
 }
+
+/**
+ * Cancel Order.
+ * @param {Object} admin - The Shopify admin client.
+ * @param {string} orderId - The ID of the order to cancel.
+ * @param {string} reason - The reason for cancellation.
+ * @param {boolean} restockItems - Whether to restock items.
+ * @param {Array} lineItems - Specific line items to cancel (optional).
+ * @param {boolean} notifyCustomer - Whether to notify the customer.
+ * @returns {Promise<Object>} - The API response.
+ */
+export async function cancelOrder(admin, orderId, reason = "OTHER", restockItems = false, lineItems = [], notifyCustomer = true) {
+    if (!admin) {
+        throw new Error('Admin client is required');
+    }
+
+    if (!orderId) {
+        throw new Error('Order ID is required for cancellation');
+    }
+
+    // If lineItems is empty, we will cancel the entire order
+
+    const cancelQuery = `
+        mutation cancelOrder($orderId: ID!, $reason: OrderCancelReason!, $restock: Boolean!, $lineItems: [OrderLineItemCancelInput!], $notifyCustomer: Boolean!) {
+            orderCancel(id: $orderId, reason: $reason, restock: $restock, lineItems: $lineItems, notifyCustomer: $notifyCustomer) {
+                order {
+                    id
+                    statusUrl
+                }
+                userErrors {
+                    field
+                    message
+                }
+            }
+        }
+    `
+
+    try {
+        const { data, errors } = await admin.request(cancelQuery, {
+            variables: {
+                orderId: `gid://shopify/Order/${orderId}`,
+                reason,
+                restock,
+                lineItems,
+                notifyCustomer
+            }
+        })
+
+        if (errors) {
+            throw new Error(`GraphQL errors: ${JSON.stringify(errors)}`);
+        }
+
+        const canceledOrder = data.orderCancel.order
+
+        if (!canceledOrder) {
+            throw new Error('Order cancellation failed');
+        }
+
+        return canceledOrder;
+    } catch (error) {
+        log(`Error canceling order: ${error.message}`, "ERROR");
+        throw error;
+    }
+}

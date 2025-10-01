@@ -1,65 +1,68 @@
 import { json } from "@remix-run/node"
+import { log } from "../utils/logger"
+import { createAdminApiClient } from "@shopify/admin-api-client"
+import { cancelOrder } from "../utils/shopifyOrder"
+import { checkToken } from "../utils/auth"
+import { getSession } from "../utils/session"
 
-// Handle GET requests
-export async function loader({ request, params }) {
-  const orderId = params.id
-  const url = new URL(request.url)
-
-  console.log("=== ORDER CANCEL API (GET) ===")
-  console.log("Order ID:", orderId)
-  console.log("Method:", request.method)
-  console.log("URL:", request.url)
-  console.log("Headers:", Object.fromEntries(request.headers.entries()))
-  console.log("Search Params:", Object.fromEntries(url.searchParams.entries()))
-  console.log("Timestamp:", new Date().toISOString())
-  console.log("==============================")
-
-  return json(
-    {
-      success: true,
-    },
-    { status: 200 },
-  )
-}
-
-// Handle POST, PUT, DELETE requests
 export async function action({ request, params }) {
   try {
     const orderId = params.id
-    const url = new URL(request.url)
+    const body = await request.json()
 
-    // Get request body if present
-    let body = null
-    try {
-      const contentType = request.headers.get("content-type")
-      if (contentType && contentType.includes("application/json")) {
-        body = await request.json()
-      } else if (contentType && contentType.includes("application/x-www-form-urlencoded")) {
-        const formData = await request.formData()
-        body = Object.fromEntries(formData.entries())
-      } else {
-        body = await request.text()
-      }
-    } catch {
-      // No body or invalid format
+    if (!checkToken(request)) {
+      log("Invalid token in cancel API", "ERROR")
+      return json(
+        {
+          success: false,
+          message: "Invalid token",
+        },
+        { status: 401 },
+      )
     }
 
-    // Get headers
-    const headers = Object.fromEntries(request.headers.entries())
+    const { store, accessToken } = await getSession(request)
+    if (!store || !accessToken) {
+      return json(
+        {
+          success: false,
+          message: "No store header or session found",
+        },
+        { status: 400 },
+      )
+    }
 
-    // Get search params
-    const searchParams = Object.fromEntries(url.searchParams.entries())
+    // Create Shopify Admin client
+    const client = createAdminApiClient({
+      storeDomain: store,
+      apiVersion: process.env.SHOPIFY_API_VERSION,
+      accessToken: accessToken,
+    })
 
-    // Log all the data
-    console.log("=== ORDER CANCEL API CALLED ===")
-    console.log("Order ID:", orderId)
-    console.log("Method:", request.method)
-    console.log("URL:", request.url)
-    console.log("Headers:", headers)
-    console.log("Search Params:", searchParams)
-    console.log("Body:", body)
-    console.log("Timestamp:", new Date().toISOString())
-    console.log("================================")
+    // cancel the order
+    const response = await cancelOrder(
+      client,
+      orderId,
+      body.reason || "OTHER",
+      body.restockItems || false,
+      body.lineItems || [],
+      body.notifyCustomer || true,
+    )
+
+    if (response.errors) {
+      log(
+        `Error canceling order ${orderId}: ${JSON.stringify(response.errors)}`,
+        "ERROR",
+      )
+      return json(
+        {
+          success: false,
+          message: "Error canceling order",
+          errors: response.errors,
+        },
+        { status: 500 },
+      )
+    }
 
     // Return success response
     return json(
@@ -76,7 +79,7 @@ export async function action({ request, params }) {
         message: "Internal server error",
         error: error.message || "Unknown error",
       },
-      { status: 200 }, // Still return 200 as requested
+      { status: 500 }, 
     )
   }
 }
