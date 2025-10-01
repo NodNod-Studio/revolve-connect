@@ -3,7 +3,7 @@ import { log } from '../utils/logger'
 import { paidOrder } from "../services/paidOrder"
 
 export const action = async ({ request }) => {
-  const { topic, shop, session, admin, payload } = await authenticate.webhook(request)
+  const { admin, payload } = await authenticate.webhook(request)
 
   if (!admin) {
     log("Admin context unavailable", "ERROR")

@@ -3,7 +3,7 @@ import { authenticate } from "../shopify.server"
 import { log } from "../utils/logger"
 
 export const action = async ({ request }) => {
-  const { topic, shop, session, admin, payload } = await authenticate.webhook(request)
+  const { topic, admin, payload } = await authenticate.webhook(request)
 
   if (!admin) {
     log("Admin context unavailable", "ERROR")
