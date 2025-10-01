@@ -1,4 +1,4 @@
-import axios from 'axios';
+import fetch from 'node-fetch';
 import redisClient from './redisClient';
 import { log } from "../utils/logger"
 
@@ -36,13 +36,21 @@ export async function submitOrder(orderPayload) {
 
 
     try {
-        const response = await axios.post(process.env.REVOLVE_SERVER_URL + `/content/checkout/shopify/payment?token=${token}&userId=${userId}`, payload);
+        const response = await fetch(process.env.REVOLVE_SERVER_URL + `/content/checkout/shopify/payment?token=${token}&userId=${userId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
 
-        if (!response.success) {
-            log('Error paid order: ' + JSON.stringify(response), "ERROR");
+        const responseData = await response.json();
+
+        if (!responseData.success) {
+            log('Error paid order: ' + JSON.stringify(responseData), "ERROR");
         }
 
-        return { response: response.orders };
+        return { response: responseData };
     } catch (error) {
         log('Error paid order: ' + error, "ERROR");
         throw error;
