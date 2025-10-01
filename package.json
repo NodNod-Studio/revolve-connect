@@ -12,6 +12,7 @@
     "start": "remix-serve ./build/server/index.js",
     "docker-start": "npm run start",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
+    "lint-fix": "eslint --fix .",
     "shopify": "shopify",
     "graphql-codegen": "graphql-codegen",
     "vite": "vite"

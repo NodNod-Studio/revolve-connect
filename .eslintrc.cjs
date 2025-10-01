@@ -10,4 +10,14 @@ module.exports = {
   globals: {
     shopify: "readonly"
   },
+  rules: {
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "no-console": "off",
+    "indent": ["error", 2, { "SwitchCase": 1 }],
+    "semi": ["error", "never"],
+    "quotes": ["error", "single", { "avoidEscape": true }],
+    "jsx-quotes": ["error", "prefer-single"],
+    "react/jsx-indent": ["error", 2],
+    "react/jsx-indent-props": ["error", 2],
+  }
 };

@@ -1,18 +1,18 @@
-import { json } from "@remix-run/node"
+import { json } from '@remix-run/node'
 
 // Handle GET requests
 export async function loader({ request, params }) {
   const orderId = params.id
   const url = new URL(request.url)
 
-  console.log("=== ORDER RETURN API (GET) ===")
-  console.log("Order ID:", orderId)
-  console.log("Method:", request.method)
-  console.log("URL:", request.url)
-  console.log("Headers:", Object.fromEntries(request.headers.entries()))
-  console.log("Search Params:", Object.fromEntries(url.searchParams.entries()))
-  console.log("Timestamp:", new Date().toISOString())
-  console.log("===============================")
+  console.log('=== ORDER RETURN API (GET) ===')
+  console.log('Order ID:', orderId)
+  console.log('Method:', request.method)
+  console.log('URL:', request.url)
+  console.log('Headers:', Object.fromEntries(request.headers.entries()))
+  console.log('Search Params:', Object.fromEntries(url.searchParams.entries()))
+  console.log('Timestamp:', new Date().toISOString())
+  console.log('===============================')
 
   return json(
     {
@@ -31,10 +31,10 @@ export async function action({ request, params }) {
     // Get request body if present
     let body = null
     try {
-      const contentType = request.headers.get("content-type")
-      if (contentType && contentType.includes("application/json")) {
+      const contentType = request.headers.get('content-type')
+      if (contentType && contentType.includes('application/json')) {
         body = await request.json()
-      } else if (contentType && contentType.includes("application/x-www-form-urlencoded")) {
+      } else if (contentType && contentType.includes('application/x-www-form-urlencoded')) {
         const formData = await request.formData()
         body = Object.fromEntries(formData.entries())
       } else {
@@ -51,15 +51,15 @@ export async function action({ request, params }) {
     const searchParams = Object.fromEntries(url.searchParams.entries())
 
     // Log all the data
-    console.log("=== ORDER RETURN API CALLED ===")
-    console.log("Order ID:", orderId)
-    console.log("Method:", request.method)
-    console.log("URL:", request.url)
-    console.log("Headers:", headers)
-    console.log("Search Params:", searchParams)
-    console.log("Body:", body)
-    console.log("Timestamp:", new Date().toISOString())
-    console.log("=================================")
+    console.log('=== ORDER RETURN API CALLED ===')
+    console.log('Order ID:', orderId)
+    console.log('Method:', request.method)
+    console.log('URL:', request.url)
+    console.log('Headers:', headers)
+    console.log('Search Params:', searchParams)
+    console.log('Body:', body)
+    console.log('Timestamp:', new Date().toISOString())
+    console.log('=================================')
 
 
     
@@ -71,12 +71,12 @@ export async function action({ request, params }) {
       { status: 200 },
     )
   } catch (error) {
-    console.error("Error in return API:", error)
+    console.error('Error in return API:', error)
     return json(
       {
         success: false,
-        message: "Internal server error",
-        error: error.message || "Unknown error",
+        message: 'Internal server error',
+        error: error.message || 'Unknown error',
       },
       { status: 200 }, // Still return 200 as requested
     )

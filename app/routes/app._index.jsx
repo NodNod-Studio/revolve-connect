@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useFetcher } from "@remix-run/react";
+import { useEffect } from 'react'
+import { useFetcher } from '@remix-run/react'
 import {
   Page,
   Layout,
@@ -11,21 +11,21 @@ import {
   List,
   Link,
   InlineStack,
-} from "@shopify/polaris";
-import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
-import { authenticate } from "../shopify.server";
+} from '@shopify/polaris'
+import { TitleBar, useAppBridge } from '@shopify/app-bridge-react'
+import { authenticate } from '../shopify.server'
 
 export const loader = async ({ request }) => {
-  await authenticate.admin(request);
+  await authenticate.admin(request)
 
-  return null;
-};
+  return null
+}
 
 export const action = async ({ request }) => {
-  const { admin } = await authenticate.admin(request);
-  const color = ["Red", "Orange", "Yellow", "Green"][
+  const { admin } = await authenticate.admin(request)
+  const color = ['Red', 'Orange', 'Yellow', 'Green'][
     Math.floor(Math.random() * 4)
-  ];
+  ]
   const response = await admin.graphql(
     `#graphql
       mutation populateProduct($product: ProductCreateInput!) {
@@ -55,10 +55,10 @@ export const action = async ({ request }) => {
         },
       },
     },
-  );
-  const responseJson = await response.json();
-  const product = responseJson.data.productCreate.product;
-  const variantId = product.variants.edges[0].node.id;
+  )
+  const responseJson = await response.json()
+  const product = responseJson.data.productCreate.product
+  const variantId = product.variants.edges[0].node.id
   const variantResponse = await admin.graphql(
     `#graphql
     mutation shopifyRemixTemplateUpdateVariant($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
@@ -74,100 +74,100 @@ export const action = async ({ request }) => {
     {
       variables: {
         productId: product.id,
-        variants: [{ id: variantId, price: "100.00" }],
+        variants: [{ id: variantId, price: '100.00' }],
       },
     },
-  );
-  const variantResponseJson = await variantResponse.json();
+  )
+  const variantResponseJson = await variantResponse.json()
 
   return {
     product: responseJson.data.productCreate.product,
     variant: variantResponseJson.data.productVariantsBulkUpdate.productVariants,
-  };
-};
+  }
+}
 
 export default function Index() {
-  const fetcher = useFetcher();
-  const shopify = useAppBridge();
+  const fetcher = useFetcher()
+  const shopify = useAppBridge()
   const isLoading =
-    ["loading", "submitting"].includes(fetcher.state) &&
-    fetcher.formMethod === "POST";
+    ['loading', 'submitting'].includes(fetcher.state) &&
+    fetcher.formMethod === 'POST'
   const productId = fetcher.data?.product?.id.replace(
-    "gid://shopify/Product/",
-    "",
-  );
+    'gid://shopify/Product/',
+    '',
+  )
 
   useEffect(() => {
     if (productId) {
-      shopify.toast.show("Product created");
+      shopify.toast.show('Product created')
     }
-  }, [productId, shopify]);
-  const generateProduct = () => fetcher.submit({}, { method: "POST" });
+  }, [productId, shopify])
+  const generateProduct = () => fetcher.submit({}, { method: 'POST' })
 
   return (
     <Page>
-      <TitleBar title="Remix app template">
-        <button variant="primary" onClick={generateProduct}>
+      <TitleBar title='Remix app template'>
+        <button variant='primary' onClick={generateProduct}>
           Generate a product
         </button>
       </TitleBar>
-      <BlockStack gap="500">
+      <BlockStack gap='500'>
         <Layout>
           <Layout.Section>
             <Card>
-              <BlockStack gap="500">
-                <BlockStack gap="200">
-                  <Text as="h2" variant="headingMd">
+              <BlockStack gap='500'>
+                <BlockStack gap='200'>
+                  <Text as='h2' variant='headingMd'>
                     Congrats on creating a new Shopify app 🎉
                   </Text>
-                  <Text variant="bodyMd" as="p">
-                    This embedded app template uses{" "}
+                  <Text variant='bodyMd' as='p'>
+                    This embedded app template uses{' '}
                     <Link
-                      url="https://shopify.dev/docs/apps/tools/app-bridge"
-                      target="_blank"
+                      url='https://shopify.dev/docs/apps/tools/app-bridge'
+                      target='_blank'
                       removeUnderline
                     >
                       App Bridge
-                    </Link>{" "}
-                    interface examples like an{" "}
-                    , as well as an{" "}
+                    </Link>{' '}
+                    interface examples like an{' '}
+                    , as well as an{' '}
                     <Link
-                      url="https://shopify.dev/docs/api/admin-graphql"
-                      target="_blank"
+                      url='https://shopify.dev/docs/api/admin-graphql'
+                      target='_blank'
                       removeUnderline
                     >
                       Admin GraphQL
-                    </Link>{" "}
+                    </Link>{' '}
                     mutation demo, to provide a starting point for app
                     development.
                   </Text>
                 </BlockStack>
-                <BlockStack gap="200">
-                  <Text as="h3" variant="headingMd">
+                <BlockStack gap='200'>
+                  <Text as='h3' variant='headingMd'>
                     Get started with products
                   </Text>
-                  <Text as="p" variant="bodyMd">
+                  <Text as='p' variant='bodyMd'>
                     Generate a product with GraphQL and get the JSON output for
-                    that product. Learn more about the{" "}
+                    that product. Learn more about the{' '}
                     <Link
-                      url="https://shopify.dev/docs/api/admin-graphql/latest/mutations/productCreate"
-                      target="_blank"
+                      url='https://shopify.dev/docs/api/admin-graphql/latest/mutations/productCreate'
+                      target='_blank'
                       removeUnderline
                     >
                       productCreate
-                    </Link>{" "}
+                    </Link>{' '}
                     mutation in our API references.
                   </Text>
                 </BlockStack>
-                <InlineStack gap="300">
+                <InlineStack gap='300'>
                   <Button loading={isLoading} onClick={generateProduct}>
                     Generate a product
                   </Button>
                   {fetcher.data?.product && (
                     <Button
                       url={`shopify:admin/products/${productId}`}
-                      target="_blank"
-                      variant="plain"
+                      target='_blank'
+                      variant='plain'
                     >
                       View product
                     </Button>
@@ -175,17 +175,17 @@ export default function Index() {
                 </InlineStack>
                 {fetcher.data?.product && (
                   <>
-                    <Text as="h3" variant="headingMd">
-                      {" "}
+                    <Text as='h3' variant='headingMd'>
+                      {' '}
                       productCreate mutation
                     </Text>
                     <Box
-                      padding="400"
-                      background="bg-surface-active"
-                      borderWidth="025"
-                      borderRadius="200"
-                      borderColor="border"
-                      overflowX="scroll"
+                      padding='400'
+                      background='bg-surface-active'
+                      borderWidth='025'
+                      borderRadius='200'
+                      borderColor='border'
+                      overflowX='scroll'
                     >
                       <pre style={{ margin: 0 }}>
                         <code>
@@ -193,17 +193,17 @@ export default function Index() {
                         </code>
                       </pre>
                     </Box>
-                    <Text as="h3" variant="headingMd">
-                      {" "}
+                    <Text as='h3' variant='headingMd'>
+                      {' '}
                       productVariantsBulkUpdate mutation
                     </Text>
                     <Box
-                      padding="400"
-                      background="bg-surface-active"
-                      borderWidth="025"
-                      borderRadius="200"
-                      borderColor="border"
-                      overflowX="scroll"
+                      padding='400'
+                      background='bg-surface-active'
+                      borderWidth='025'
+                      borderRadius='200'
+                      borderColor='border'
+                      overflowX='scroll'
                     >
                       <pre style={{ margin: 0 }}>
                         <code>
@@ -216,60 +216,60 @@ export default function Index() {
               </BlockStack>
             </Card>
           </Layout.Section>
-          <Layout.Section variant="oneThird">
-            <BlockStack gap="500">
+          <Layout.Section variant='oneThird'>
+            <BlockStack gap='500'>
               <Card>
-                <BlockStack gap="200">
-                  <Text as="h2" variant="headingMd">
+                <BlockStack gap='200'>
+                  <Text as='h2' variant='headingMd'>
                     App template specs
                   </Text>
-                  <BlockStack gap="200">
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodyMd">
+                  <BlockStack gap='200'>
+                    <InlineStack align='space-between'>
+                      <Text as='span' variant='bodyMd'>
                         Framework
                       </Text>
                       <Link
-                        url="https://remix.run"
-                        target="_blank"
+                        url='https://remix.run'
+                        target='_blank'
                         removeUnderline
                       >
                         Remix
                       </Link>
                     </InlineStack>
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodyMd">
+                    <InlineStack align='space-between'>
+                      <Text as='span' variant='bodyMd'>
                         Database
                       </Text>
                     </InlineStack>
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodyMd">
+                    <InlineStack align='space-between'>
+                      <Text as='span' variant='bodyMd'>
                         Interface
                       </Text>
                       <span>
                         <Link
-                          url="https://polaris.shopify.com"
-                          target="_blank"
+                          url='https://polaris.shopify.com'
+                          target='_blank'
                           removeUnderline
                         >
                           Polaris
                         </Link>
-                        {", "}
+                        {', '}
                         <Link
-                          url="https://shopify.dev/docs/apps/tools/app-bridge"
-                          target="_blank"
+                          url='https://shopify.dev/docs/apps/tools/app-bridge'
+                          target='_blank'
                           removeUnderline
                         >
                           App Bridge
                         </Link>
                       </span>
                     </InlineStack>
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodyMd">
+                    <InlineStack align='space-between'>
+                      <Text as='span' variant='bodyMd'>
                         API
                       </Text>
                       <Link
-                        url="https://shopify.dev/docs/api/admin-graphql"
-                        target="_blank"
+                        url='https://shopify.dev/docs/api/admin-graphql'
+                        target='_blank'
                         removeUnderline
                       >
                         GraphQL API
@@ -279,28 +279,28 @@ export default function Index() {
                 </BlockStack>
               </Card>
               <Card>
-                <BlockStack gap="200">
-                  <Text as="h2" variant="headingMd">
+                <BlockStack gap='200'>
+                  <Text as='h2' variant='headingMd'>
                     Next steps
                   </Text>
                   <List>
                     <List.Item>
-                      Build an{" "}
+                      Build an{' '}
                       <Link
-                        url="https://shopify.dev/docs/apps/getting-started/build-app-example"
-                        target="_blank"
+                        url='https://shopify.dev/docs/apps/getting-started/build-app-example'
+                        target='_blank'
                         removeUnderline
                       >
-                        {" "}
+                        {' '}
                         example app
-                      </Link>{" "}
+                      </Link>{' '}
                       to get started
                     </List.Item>
                     <List.Item>
-                      Explore Shopify’s API with{" "}
+                      Explore Shopify’s API with{' '}
                       <Link
-                        url="https://shopify.dev/docs/apps/tools/graphiql-admin-api"
-                        target="_blank"
+                        url='https://shopify.dev/docs/apps/tools/graphiql-admin-api'
+                        target='_blank'
                         removeUnderline
                       >
                         GraphiQL
@@ -314,5 +314,5 @@ export default function Index() {
         </Layout>
       </BlockStack>
     </Page>
-  );
+  )
 }

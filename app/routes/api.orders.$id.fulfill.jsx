@@ -1,9 +1,9 @@
-import { json } from "@remix-run/node"
-import { log } from "../utils/logger"
-import { createAdminApiClient } from "@shopify/admin-api-client"
-import { fulfillOrder } from "../utils/shopifyOrder"
-import { checkToken } from "../utils/auth"
-import { getSession } from "../utils/session"
+import { json } from '@remix-run/node'
+import { log } from '../utils/logger'
+import { createAdminApiClient } from '@shopify/admin-api-client'
+import { fulfillOrder } from '../utils/shopifyOrder'
+import { checkToken } from '../utils/auth'
+import { getSession } from '../utils/session'
 
 export async function action({ request, params }) {
   try {
@@ -11,11 +11,11 @@ export async function action({ request, params }) {
     const body = await request.json()
 
     if (!checkToken(request)) {
-      log("Invalid token in fulfill API", "ERROR")
+      log('Invalid token in fulfill API', 'ERROR')
       return json(
         {
           success: false,
-          message: "Invalid token",
+          message: 'Invalid token',
         },
         { status: 401 },
       )
@@ -26,7 +26,7 @@ export async function action({ request, params }) {
       return json(
         {
           success: false,
-          message: "No store header or session found",
+          message: 'No store header or session found',
         },
         { status: 400 },
       )
@@ -50,12 +50,12 @@ export async function action({ request, params }) {
     if (response.errors) {
       log(
         `Error fulfilling order ${orderId}: ${JSON.stringify(response.errors)}`,
-        "ERROR",
+        'ERROR',
       )
       return json(
         {
           success: false,
-          message: "Error fulfilling order",
+          message: 'Error fulfilling order',
           errors: response.errors,
         },
         { status: 500 },
@@ -70,12 +70,12 @@ export async function action({ request, params }) {
       { status: 200 },
     )
   } catch (error) {
-    console.error("Error in fulfill API:", error)
+    console.error('Error in fulfill API:', error)
     return json(
       {
         success: false,
-        message: "Internal server error",
-        error: error.message || "Unknown error",
+        message: 'Internal server error',
+        error: error.message || 'Unknown error',
       },
       { status: 500 }, 
     )
