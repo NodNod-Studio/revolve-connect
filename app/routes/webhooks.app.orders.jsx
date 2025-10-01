@@ -15,7 +15,7 @@ export const action = async ({ request }) => {
     case "ORDERS_CREATED":
       log(`Order created webhook received for order ${payload.id}, payload: ${JSON.stringify(payload)}`)
 
-      submitOrder(payload).then((res) => {
+      submitOrder(admin, payload).then((res) => {
         log(`Order submission response: ${JSON.stringify(res)}`)
       }).catch((error) => {
         log(`Error submitting order: ${error.message}`, "ERROR")

@@ -1,13 +1,15 @@
 import fetch from 'node-fetch';
 import redisClient from './redisClient';
-import { log } from "../utils/logger"
+import { log } from "../utils/logger";
+import { getOrderMetafield } from '../utils/shopifyOrder';
 
 /**
  * Submits an order paid to Revolve server API.
+ * @param {Object} admin - The Shopify admin client.
  * @param {Object} orderPayload - The full order payload from Shopify.
  * @returns {Promise<{response: any}>}
  */
-export async function submitOrder(orderPayload) {
+export async function paidOrder(admin, orderPayload) {
     const token = await redisClient.get('revolve_token');
     const userId = await redisClient.get('revolve_userId');
 
@@ -33,7 +35,10 @@ export async function submitOrder(orderPayload) {
     };
 
     // Set invoice
-
+    const invoice = await getOrderMetafield(admin, orderPayload.id, 'invoice');
+    if (invoice) {
+        payload.invoice = invoice;
+    }
 
     try {
         const response = await fetch(process.env.REVOLVE_SERVER_URL + `/content/checkout/shopify/payment?token=${token}&userId=${userId}`, {

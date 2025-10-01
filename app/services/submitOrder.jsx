@@ -1,13 +1,15 @@
 import fetch from 'node-fetch';
 import redisClient from './redisClient';
-import { log } from "../utils/logger"
+import { log } from "../utils/logger";
+import { saveOrderMetafield } from '../utils/shopifyOrder';
 
 /**
  * Submits an order to Revolve server API.
+ * @param {Object} admin - The Shopify admin client.
  * @param {Object} orderPayload - The full order payload from Shopify.
  * @returns {Promise<{response: any}>}
  */
-export async function submitOrder(orderPayload) {
+export async function submitOrder(admin, orderPayload) {
     const token = await redisClient.get('revolve_token');
     const userId = await redisClient.get('revolve_userId');
 
@@ -30,7 +32,7 @@ export async function submitOrder(orderPayload) {
     };
 
     // Extract coupon codes from discount codes and applications
-    const discountCodes = orderPayload.discount_codes.concat(orderPayload.discount_applications);
+    const discountCodes = (orderPayload.discount_codes || []).concat(orderPayload.discount_applications || []);
     const coupon = discountCodes.length
       ? discountCodes.map(d => d.code || d.title).join(', ')
       : '';
@@ -79,13 +81,15 @@ export async function submitOrder(orderPayload) {
         if (!responseData.success) {
             log('Error submitting order: ' + JSON.stringify(responseData), "ERROR");
         } else {
-            const invoice = responseData.orders.instock.invoice;
+            const invoice = responseData.orders && responseData.orders.instock?.invoice ? responseData.orders.instock.invoice : '';
 
             // save invoice in a order metafield
-
+            if (invoice) {
+                await saveOrderMetafield(admin, orderPayload.id, 'invoice_number', invoice);
+            }
         }
 
-        return { response: response };
+        return { response: responseData };
     } catch (error) {
         log('Error submitting order: ' + error, "ERROR");
         throw error;
